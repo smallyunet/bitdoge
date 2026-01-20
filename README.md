@@ -53,8 +53,8 @@ This is where BitDoge diverges into "PVP" territory.
 | **Genesis Block** | #24,444,444 (Approx. Feb 2026) |
 | **Block Time** | ~12 Seconds (Ethereum) |
 | **Halving Period** | ~4 Years (10,512,000 Blocks) |
-| **Esimated End Date** | Year 2166 |
-| **Smart Contract** | `0xBd09e...` (Vanity Address) |
+| **Estimated End Date** | Year 2166 |
+| **Smart Contract** | `0x000000001994bb7b8ee7d91012bdecf5ec033a7f` |
 
 ### Supply Curve
 
@@ -71,7 +71,7 @@ Mining is a simple interaction with the contract. You pay the gas fee to execute
 
 ```bash
 # Direct Mining (Send 0 ETH)
-cast send <CONTRACT_ADDRESS> --rpc-url <RPC> --private-key <KEY>
+cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f --rpc-url <RPC> --private-key <KEY>
 ```
 
 **Sacrifice (Optional):**
@@ -90,13 +90,5 @@ This project is built with **Foundry**.
 
 ### Key Tools
 -   **CPU Miner**: `script/mine_mp.py` - A Python script to calculate vanity contract addresses.
--   **GPU Guide**: `GPU_VANITY_GUIDE.md` - Instructions for using GPU acceleration.
-
-## ⚠️ Disclaimer
-
-BitDoge is a fun community token and code-as-art.
--   It has **no intrinsic value**.
--   It is **not** an investment.
--   The code is provided "as is."
 
 **"Vires in Numeris."**
