@@ -1,23 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useReadContracts, useBlockNumber } from 'wagmi';
 import { formatEther } from 'viem';
-import { motion } from 'framer-motion';
-import { Sparkles, Activity, Clock, Wallet, Cuboid } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Wallet, Cuboid } from 'lucide-react';
 import { StatsCard } from './components/StatsCard';
 import { Miner } from './components/Miner';
 import BitDogeABI from './abi/BitDoge.json';
 
-const CONTRACT_ADDRESS = "0x000000001994bb7b8ee7d91012bdecf5ec033a7f";
-const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
-const GENESIS_BLOCK = 24444444n;
-const HALVING_BLOCKS = 10512000n;
+import { BITDOGE } from './config/bitdoge';
+import { formatIntegerWithCommas, formatApproxDurationSeconds, trimDecimalString } from './lib/format';
+import { addErc20ToWallet } from './lib/wallet';
+
+const {
+  CONTRACT_ADDRESS,
+  BURN_ADDRESS,
+  GENESIS_BLOCK,
+  HALVING_BLOCKS,
+  SYMBOL,
+  DECIMALS,
+  EXPLORER_BASE_URL,
+  ESTIMATED_BLOCK_TIME_SECONDS,
+} = BITDOGE;
 
 function App() {
+  const reduceMotion = useReducedMotion();
   const { data: blockNumberVal } = useBlockNumber({ watch: true });
   const currentBlock = blockNumberVal || 0n;
 
-  const { data: contractData } = useReadContracts({
+  const {
+    data: contractData,
+    isError: isContractsError,
+    error: contractsError,
+  } = useReadContracts({
     contracts: [
       {
         address: CONTRACT_ADDRESS,
@@ -33,11 +48,6 @@ function App() {
       {
         address: CONTRACT_ADDRESS,
         abi: BitDogeABI,
-        functionName: 'lastMinedBlock',
-      },
-      {
-        address: CONTRACT_ADDRESS,
-        abi: BitDogeABI,
         functionName: 'totalSacrificed',
       }
     ],
@@ -46,38 +56,52 @@ function App() {
     }
   });
 
-  const totalSupply = contractData?.[0]?.result !== undefined ? formatEther(contractData[0].result).split('.')[0] : "Loading...";
-  const burned = contractData?.[1]?.result !== undefined ? formatEther(contractData[1].result).split('.')[0] : "0";
-  const lastMined = contractData?.[2]?.result || 0n;
-  const totalSacrificed = contractData?.[3]?.result ? formatEther(contractData[3].result) : "0";
+  const totalSupplyRaw = contractData?.[0]?.result;
+  const burnedRaw = contractData?.[1]?.result;
+  const totalSacrificedRaw = contractData?.[2]?.result;
+
+  const totalSupply = useMemo(() => {
+    if (totalSupplyRaw === undefined) return null;
+    const eth = formatEther(totalSupplyRaw);
+    const integer = eth.split('.')[0];
+    return formatIntegerWithCommas(integer);
+  }, [totalSupplyRaw]);
+
+  const burned = useMemo(() => {
+    if (burnedRaw === undefined) return null;
+    const eth = formatEther(burnedRaw);
+    const integer = eth.split('.')[0];
+    return formatIntegerWithCommas(integer);
+  }, [burnedRaw]);
+
+  const totalSacrificed = useMemo(() => {
+    if (!totalSacrificedRaw) return '0';
+    return trimDecimalString(formatEther(totalSacrificedRaw), 6);
+  }, [totalSacrificedRaw]);
 
   // Calculations
   const isStarted = currentBlock >= GENESIS_BLOCK;
   const blocksPassed = isStarted ? currentBlock - GENESIS_BLOCK : 0n;
   const era = blocksPassed / HALVING_BLOCKS;
   const blocksUntilHalving = HALVING_BLOCKS - (blocksPassed % HALVING_BLOCKS);
-  const currentReward = era >= 64n ? 0 : (1 >> Number(era)); // Assuming int math roughly 1.0 -> 0.5 etc but solidity does bit shift on 1e18. 
-  // Detailed reward calc: 1e18 >> era. 
-  const currentRewardFormatted = (1 / (2 ** Number(era))).toFixed(Number(era) > 0 ? 8 : 1);
+  const currentRewardFormatted = useMemo(() => {
+    if (!isStarted) return '0';
+    if (era >= 64n) return '0';
+    const wei = (10n ** 18n) >> era;
+    return trimDecimalString(formatEther(wei), 8);
+  }, [era, isStarted]);
+
+  const blocksUntilGenesis = !isStarted ? (GENESIS_BLOCK - currentBlock) : 0n;
+  const genesisEta = !isStarted
+    ? formatApproxDurationSeconds(Number(blocksUntilGenesis) * ESTIMATED_BLOCK_TIME_SECONDS)
+    : '';
 
   const addToWallet = async () => {
-    if (window.ethereum) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_watchAsset',
-          params: {
-            type: 'ERC20',
-            options: {
-              address: CONTRACT_ADDRESS,
-              symbol: 'BITDOGE',
-              decimals: 18,
-            },
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
+    await addErc20ToWallet({
+      address: CONTRACT_ADDRESS,
+      symbol: SYMBOL,
+      decimals: DECIMALS,
+    });
   };
 
   return (
@@ -111,17 +135,17 @@ function App() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-bitdoge-gold/10 rounded-full blur-[100px] -z-10" />
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+            animate={reduceMotion ? false : { opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight"
           >
             The 140-Year <br />
             <span className="text-bitdoge-gold text-glow">Simulation</span>
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={reduceMotion ? false : { opacity: 1 }}
+            transition={reduceMotion ? undefined : { delay: 0.2 }}
             className="text-lg text-neutral-400 max-w-2xl mx-auto mb-10"
           >
             BitDoge mimics Bitcoin's supply curve on Ethereum.
@@ -140,8 +164,12 @@ function App() {
           />
           <StatsCard
             label="Block Height"
-            value={blockNumberVal ? `#${currentBlock.toString()}` : "Loading..."}
-            subtext={isStarted ? "Live" : `Genesis: ${GENESIS_BLOCK}`}
+            value={blockNumberVal ? `#${formatIntegerWithCommas(currentBlock.toString())}` : null}
+            subtext={
+              isStarted
+                ? 'Live'
+                : `Genesis: ${GENESIS_BLOCK.toString()} (${blocksUntilGenesis.toString()} blocks ${genesisEta ? `/${genesisEta}` : ''})`
+            }
             delay={0.2}
           />
           <StatsCard
@@ -158,6 +186,13 @@ function App() {
             className="border-red-900/30"
           />
         </div>
+
+        {isContractsError && (
+          <div className="mb-10 p-4 rounded-xl border border-red-900/40 bg-red-900/10 text-red-300 text-xs">
+            RPC read failed. This is usually a CORS / rate limit issue on public RPCs.
+            <div className="opacity-80 mt-1 break-all">{contractsError?.message || String(contractsError)}</div>
+          </div>
+        )}
 
         {/* Interaction Area */}
         <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
@@ -203,7 +238,13 @@ function App() {
           </div>
 
           <div>
-            <Miner />
+            <Miner
+              currentBlock={currentBlock}
+              genesisBlock={GENESIS_BLOCK}
+              isStarted={isStarted}
+              explorerBaseUrl={EXPLORER_BASE_URL}
+              onAddToken={addToWallet}
+            />
           </div>
         </div>
       </main>
@@ -215,7 +256,7 @@ function App() {
           </div>
           <div className="flex gap-6 text-sm text-neutral-400">
             <a href="https://github.com/smallyunet/bitdoge" target="_blank" className="hover:text-white transition-colors">GitHub</a>
-            <a href={`https://etherscan.io/address/${CONTRACT_ADDRESS}`} target="_blank" className="hover:text-white transition-colors">Contract</a>
+            <a href={`${EXPLORER_BASE_URL}/address/${CONTRACT_ADDRESS}`} target="_blank" className="hover:text-white transition-colors">Contract</a>
           </div>
         </div>
       </footer>
