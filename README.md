@@ -8,6 +8,11 @@
 
 Designed for the ultra-long term, BitDoge will take approximately **140 years** to mint fully, concluding around the year 2166.
 
+**Quick links**
+- Contract (Mainnet): `0x000000001994bb7b8ee7d91012bdecf5ec033a7f`
+- Source / verification: https://etherscan.io/address/0x000000001994bb7b8ee7d91012bdecf5ec033a7f
+- Frontend: `web/`
+
 ---
 
 ## ⚡️ Key Mechanics
@@ -21,7 +26,7 @@ Just like Bitcoin, BitDoge has a hard-coded halving schedule.
 ### 2. The Entropy Rule (The Black Hole)
 This is where BitDoge diverges into "PVP" territory.
 -   **Mining is Competitive:** Only **one** person can mine a block (first come, first served).
--   **Missed Blocks are BURNED:** If no one mines a block (e.g., no transaction for 10 blocks), the rewards for those 10 missed blocks are minted directly to the **Burn Address** (`0x...dead`).
+-   **Missed Blocks are BURNED:** Any blocks skipped between two successful mines are minted directly to the **Burn Address** (`0x...dead`). (Example: if 10 blocks pass between mines, those 10 rewards are burned.)
 -   **Consequence:** The "Real Max Supply" will likely be significantly lower than 21M, depending on how often the network "sleeps."
 
 ### 3. Fair Launch & Security
@@ -31,7 +36,7 @@ This is where BitDoge diverges into "PVP" territory.
 
 ---
 
-## � Deployment Details
+## 🚀 Deployment Details
 
 | Item | Value |
 | :--- | :--- |
@@ -43,14 +48,14 @@ This is where BitDoge diverges into "PVP" territory.
 
 ---
 
-## �📊 Tokenomics
+## 📊 Tokenomics
 
 | Metric | Value |
 | :--- | :--- |
 | **Token Symbol** | BITDOGE |
 | **Max Supply** | 21,000,000 |
 | **Decimals** | 18 |
-| **Genesis Block** | #24,444,444 (Approx. Feb 2026) |
+| **Genesis Block** | #24,444,444 |
 | **Block Time** | ~12 Seconds (Ethereum) |
 | **Halving Period** | ~4 Years (10,512,000 Blocks) |
 | **Estimated End Date** | Year 2166 |
@@ -67,15 +72,95 @@ This is where BitDoge diverges into "PVP" territory.
 
 ## ⛏️ How to Mine
 
-Mining is a simple interaction with the contract. You pay the gas fee to execute the transaction, and the protocol rewards you with the block subsidy.
+Mining is a simple interaction with the contract's `receive()` function (a plain ETH transfer with empty calldata). You pay gas to execute the transaction, and the protocol rewards you with the block subsidy.
+
+**Rules to keep in mind**
+- Mining is locked until `GENESIS_BLOCK`.
+- Only one mine per block: if someone already mined the current block, your tx will revert.
+- EOAs only: calls from contracts will revert.
 
 ```bash
-# Direct Mining (Send 0 ETH)
-cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f --rpc-url <RPC> --private-key <KEY>
+# Direct Mining (send 0 ETH, empty calldata)
+cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f \
+	--rpc-url <RPC_URL> \
+	--private-key <PRIVATE_KEY>
+
+# Optional: Sacrifice some ETH (still empty calldata)
+cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f \
+	--value 0.01ether \
+	--rpc-url <RPC_URL> \
+	--private-key <PRIVATE_KEY>
 ```
 
 **Sacrifice (Optional):**
 You can optionally send ETH with your transaction ("Sacrifice"). This ETH is **locked forever** in the contract, serving as a "Proof of Burn" floor value for the ecosystem.
+
+---
+
+## 🧪 Development
+
+### Prerequisites
+- Foundry (`forge`, `cast`): https://book.getfoundry.sh/getting-started/installation
+- Node.js (for the frontend in `web/`)
+- Python 3 (only if you want to run the vanity salt miner `script/mine_mp.py`)
+
+### Build & test
+```bash
+forge build
+forge test
+```
+
+---
+
+## 🌐 Frontend (web)
+
+The frontend is a React + Vite app using RainbowKit + wagmi + viem.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Optional env:
+- `VITE_PROJECT_ID`: WalletConnect project id (RainbowKit). If not set, the app uses a placeholder value.
+
+---
+
+## 🔧 Deploy / Verify (Foundry scripts)
+
+Create a `.env` in the repo root:
+```bash
+RPC_URL=...
+PRIVATE_KEY=...           # as an integer (Foundry's vm.envUint)
+ETHERSCAN_API_KEY=...
+```
+
+Deploy (CREATE2 via ImmutableCreate2Factory):
+```bash
+./deploy.sh
+```
+
+Verify on Etherscan:
+```bash
+./verify.sh
+```
+
+---
+
+## 🧬 CREATE2 vanity address tooling
+
+- Print the init code hash used for CREATE2 calculations:
+	```bash
+	forge script script/GetInitCodeHash.s.sol:GetInitCodeHash
+	```
+- CPU vanity salt miner:
+	- File: `script/mine_mp.py`
+	- Dependency: `pycryptodome` (for `Crypto.Hash.keccak`)
+	```bash
+	pip install pycryptodome
+	python3 script/mine_mp.py
+	```
 
 ---
 

@@ -1,16 +1,32 @@
-# React + Vite
+# BitDoge Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for interacting with the BitDoge contract on Ethereum mainnet.
 
-Currently, two official plugins are available:
+## Requirements
+- Node.js (recommended: recent LTS)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Run locally
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Then open the URL Vite prints (usually `http://localhost:5173`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Build
+```bash
+npm run build
+npm run preview
+```
 
-## Expanding the ESLint configuration
+## Configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The app currently targets **Ethereum mainnet** and uses a fixed contract address in `src/App.jsx`:
+- `0x000000001994bb7b8ee7d91012bdecf5ec033a7f`
+
+Optional environment variables:
+- `VITE_PROJECT_ID`: WalletConnect project id for RainbowKit.
+
+## Tech
+- RainbowKit + wagmi + viem
+- Tailwind CSS
