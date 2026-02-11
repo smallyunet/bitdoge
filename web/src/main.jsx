@@ -9,7 +9,7 @@ import {
   RainbowKitProvider,
   darkTheme,
 } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, http } from 'wagmi';
 import {
   mainnet,
 } from 'wagmi/chains';
@@ -18,10 +18,15 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
+const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://ethereum-rpc.publicnode.com';
+
 const config = getDefaultConfig({
   appName: 'BitDoge',
   projectId: import.meta.env.VITE_PROJECT_ID || '3a8170812b534d0ff9d794f19a901d64', // Using a placeholder/public logic if needed, but user should replace.
   chains: [mainnet],
+  transports: {
+    [mainnet.id]: http(RPC_URL),
+  },
   ssr: false,
 });
 

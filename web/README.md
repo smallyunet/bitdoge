@@ -26,6 +26,7 @@ The app currently targets **Ethereum mainnet** and uses a fixed contract address
 
 Optional environment variables:
 - `VITE_PROJECT_ID`: WalletConnect project id for RainbowKit.
+- `VITE_RPC_URL`: Override the mainnet RPC used for public reads (defaults to `https://ethereum-rpc.publicnode.com`).
 
 ## Tech
 - RainbowKit + wagmi + viem
