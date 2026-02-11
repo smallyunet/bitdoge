@@ -46,8 +46,8 @@ function App() {
     }
   });
 
-  const totalSupply = contractData?.[0]?.result ? formatEther(contractData[0].result).split('.')[0] : "Loading...";
-  const burned = contractData?.[1]?.result ? formatEther(contractData[1].result).split('.')[0] : "0";
+  const totalSupply = contractData?.[0]?.result !== undefined ? formatEther(contractData[0].result).split('.')[0] : "Loading...";
+  const burned = contractData?.[1]?.result !== undefined ? formatEther(contractData[1].result).split('.')[0] : "0";
   const lastMined = contractData?.[2]?.result || 0n;
   const totalSacrificed = contractData?.[3]?.result ? formatEther(contractData[3].result) : "0";
 
@@ -140,7 +140,7 @@ function App() {
           />
           <StatsCard
             label="Block Height"
-            value={`#${currentBlock.toString()}`}
+            value={blockNumberVal ? `#${currentBlock.toString()}` : "Loading..."}
             subtext={isStarted ? "Live" : `Genesis: ${GENESIS_BLOCK}`}
             delay={0.2}
           />
@@ -216,7 +216,6 @@ function App() {
           <div className="flex gap-6 text-sm text-neutral-400">
             <a href="https://github.com/smallyunet/bitdoge" target="_blank" className="hover:text-white transition-colors">GitHub</a>
             <a href={`https://etherscan.io/address/${CONTRACT_ADDRESS}`} target="_blank" className="hover:text-white transition-colors">Contract</a>
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
           </div>
         </div>
       </footer>
