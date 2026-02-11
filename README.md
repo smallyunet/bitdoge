@@ -1,10 +1,10 @@
 # BitDoge (BITDOGE)
 
-**A Unique, Gamified Bitcoin Tribute on Ethereum.**
+**An Immutable Bitcoin Supply-Curve Token on Ethereum.**
 
 > "What if we could simulate Bitcoin's history, from genesis to the final block, entirely on a smart contract?"
 
-**BitDoge** is a fun, hyper-deflationary token that rigorously mimics Bitcoin's supply curve and halving mechanics. It is a pure, decentralized token with no owner, no pre-mine, and no special privileges.
+**BitDoge** is an immutable, hyper-deflationary token that rigorously mimics Bitcoin's supply curve and halving mechanics. It is a pure, decentralized token with no owner, no pre-mine, and no special privileges.
 
 Designed for the ultra-long term, BitDoge will take approximately **140 years** to mint fully, concluding around the year 2166.
 
@@ -24,7 +24,7 @@ Just like Bitcoin, BitDoge has a hard-coded halving schedule.
 -   **Halving Events:** 64 total halvings before the reward effectively hits zero.
 
 ### 2. The Entropy Rule (The Black Hole)
-This is where BitDoge diverges into "PVP" territory.
+This is where BitDoge introduces adversarial, first-come-first-served mining dynamics.
 -   **Mining is Competitive:** Only **one** person can mine a block (first come, first served).
 -   **Missed Blocks are BURNED:** Any blocks skipped between two successful mines are minted directly to the **Burn Address** (`0x...dead`). (Example: if 10 blocks pass between mines, those 10 rewards are burned.)
 -   **Consequence:** The "Real Max Supply" will likely be significantly lower than 21M, depending on how often the network "sleeps."
@@ -32,7 +32,7 @@ This is where BitDoge diverges into "PVP" territory.
 ### 3. Fair Launch & Security
 -   **No Pre-Mine:** The deployer gets nothing.
 -   **No Ownership:** The contract is immutable. No one can pause, blacklist, or mint extra tokens.
--   **EOA Only:** "Humans Only." Smart contracts cannot mine. This prevents MEV bots from easily monopolizing the blocks via atomic interactions.
+-   **EOA Only:** Smart contracts cannot mine. This reduces the ability for automated contracts to monopolize blocks via atomic interactions.
 
 ---
 
@@ -94,86 +94,5 @@ cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f \
 
 **Sacrifice (Optional):**
 You can optionally send ETH with your transaction ("Sacrifice"). This ETH is **locked forever** in the contract, serving as a "Proof of Burn" floor value for the ecosystem.
-
----
-
-## 🧪 Development
-
-### Prerequisites
-- Foundry (`forge`, `cast`): https://book.getfoundry.sh/getting-started/installation
-- Node.js (for the frontend in `web/`)
-- Python 3 (only if you want to run the vanity salt miner `script/mine_mp.py`)
-
-### Build & test
-```bash
-forge build
-forge test
-```
-
----
-
-## 🌐 Frontend (web)
-
-The frontend is a React + Vite app using RainbowKit + wagmi + viem.
-
-```bash
-cd web
-npm install
-npm run dev
-```
-
-Optional env:
-- `VITE_PROJECT_ID`: WalletConnect project id (RainbowKit). If not set, the app uses a placeholder value.
-
----
-
-## 🔧 Deploy / Verify (Foundry scripts)
-
-Create a `.env` in the repo root:
-```bash
-RPC_URL=...
-PRIVATE_KEY=...           # as an integer (Foundry's vm.envUint)
-ETHERSCAN_API_KEY=...
-```
-
-Deploy (CREATE2 via ImmutableCreate2Factory):
-```bash
-./deploy.sh
-```
-
-Verify on Etherscan:
-```bash
-./verify.sh
-```
-
----
-
-## 🧬 CREATE2 vanity address tooling
-
-- Print the init code hash used for CREATE2 calculations:
-	```bash
-	forge script script/GetInitCodeHash.s.sol:GetInitCodeHash
-	```
-- CPU vanity salt miner:
-	- File: `script/mine_mp.py`
-	- Dependency: `pycryptodome` (for `Crypto.Hash.keccak`)
-	```bash
-	pip install pycryptodome
-	python3 script/mine_mp.py
-	```
-
----
-
-## 🛠 Project Structure
-
-This project is built with **Foundry**.
-
-### Directories
--   `src/`: The Solidity smart contracts.
--   `test/`: Comprehensive unit tests simulating 40+ years of mining.
--   `script/`: Helper scripts for deployment and tools.
-
-### Key Tools
--   **CPU Miner**: `script/mine_mp.py` - A Python script to calculate vanity contract addresses.
 
 **"Vires in Numeris."**
