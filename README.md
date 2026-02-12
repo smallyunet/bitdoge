@@ -82,13 +82,13 @@ Mining is a simple interaction with the contract's `receive()` function (a plain
 ```bash
 # Direct Mining (send 0 ETH, empty calldata)
 cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f \
-	--rpc-url <RPC_URL> \
+	--rpc-url https://ethereum-rpc.publicnode.com \
 	--private-key <PRIVATE_KEY>
 
 # Optional: Sacrifice some ETH (still empty calldata)
 cast send 0x000000001994bb7b8ee7d91012bdecf5ec033a7f \
 	--value 0.01ether \
-	--rpc-url <RPC_URL> \
+	--rpc-url https://ethereum-rpc.publicnode.com \
 	--private-key <PRIVATE_KEY>
 ```
 
