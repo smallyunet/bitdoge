@@ -4,8 +4,9 @@ import { formatEther, parseAbiItem } from 'viem';
 import { Trophy, ArrowUpRight, Loader2 } from 'lucide-react';
 import { shortenAddress } from '../lib/format';
 import { BITDOGE } from '../config/bitdoge';
+import { getLogsChunked } from '../lib/getLogsChunked';
 
-const { CONTRACT_ADDRESS, EXPLORER_BASE_URL } = BITDOGE;
+const { CONTRACT_ADDRESS, EXPLORER_BASE_URL, GENESIS_BLOCK } = BITDOGE;
 
 export function TopMiners() {
     const [miners, setMiners] = useState([]);
@@ -15,10 +16,10 @@ export function TopMiners() {
     useEffect(() => {
         async function fetchMiners() {
             try {
-                const logs = await publicClient.getLogs({
+                const logs = await getLogsChunked(publicClient, {
                     address: CONTRACT_ADDRESS,
                     event: parseAbiItem('event Minted(address indexed user, uint256 userReward, uint256 burnedReward, uint256 blockNumber)'),
-                    fromBlock: 'earliest',
+                    fromBlock: GENESIS_BLOCK,
                     toBlock: 'latest'
                 });
 

@@ -6,8 +6,9 @@ import { Zap, Coins, Clock, ChevronRight, User } from 'lucide-react';
 import { shortenAddress, formatTimeAgo } from '../lib/format';
 import BitDogeABI from '../abi/BitDoge.json';
 import { BITDOGE } from '../config/bitdoge';
+import { getLogsChunked } from '../lib/getLogsChunked';
 
-const { CONTRACT_ADDRESS, EXPLORER_BASE_URL } = BITDOGE;
+const { CONTRACT_ADDRESS, EXPLORER_BASE_URL, GENESIS_BLOCK } = BITDOGE;
 
 export function RecentActivity() {
     const [events, setEvents] = useState([]);
@@ -19,16 +20,16 @@ export function RecentActivity() {
         async function fetchHistory() {
             try {
                 const [mintLogs, sacrificeLogs] = await Promise.all([
-                    publicClient.getLogs({
+                    getLogsChunked(publicClient, {
                         address: CONTRACT_ADDRESS,
                         event: parseAbiItem('event Minted(address indexed user, uint256 userReward, uint256 burnedReward, uint256 blockNumber)'),
-                        fromBlock: 'earliest', // In production, we might want to limit this range
+                        fromBlock: GENESIS_BLOCK,
                         toBlock: 'latest'
                     }),
-                    publicClient.getLogs({
+                    getLogsChunked(publicClient, {
                         address: CONTRACT_ADDRESS,
                         event: parseAbiItem('event Sacrifice(address indexed user, uint256 amount)'),
-                        fromBlock: 'earliest',
+                        fromBlock: GENESIS_BLOCK,
                         toBlock: 'latest'
                     })
                 ]);
