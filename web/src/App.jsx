@@ -6,6 +6,8 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Wallet, Cuboid } from 'lucide-react';
 import { StatsCard } from './components/StatsCard';
 import { Miner } from './components/Miner';
+import { RecentActivity } from './components/RecentActivity';
+import { TopMiners } from './components/TopMiners';
 import BitDogeABI from './abi/BitDoge.json';
 
 import { BITDOGE } from './config/bitdoge';
@@ -245,6 +247,16 @@ function App() {
               explorerBaseUrl={EXPLORER_BASE_URL}
               onAddToken={addToWallet}
             />
+          </div>
+        </div>
+
+        {/* Real-time Data Section */}
+        <div className="mt-24 grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <RecentActivity />
+          </div>
+          <div className="lg:col-span-1">
+            <TopMiners />
           </div>
         </div>
       </main>
